@@ -23,7 +23,7 @@ Approaches:
 #class Config:
 #    """
 #    base config file.
-#    by default it is in $HOME/.config/Robust/conf.ini
+#    by default it is in $HOME/.config/Hook/conf.ini
 #    
 #    PARAMS:
 #     
@@ -33,15 +33,15 @@ Approaches:
 
 class Storage:
     """
-    user data is stored at $HOME/.local/share/Robust/tree.P
-    config file stored at $HOME/.config/Robust/conf.ini
+    user data is stored at $HOME/.local/share/Hook/tree.P
+    config file stored at $HOME/.config/Hook/conf.ini
     NOTE: Why am I using conf??
         
     saves files and loads files basically
     """
     def __init__(self,tree):
         self.tree = tree
-        self.data_dir = os.environ.get("HOME") + "/.local/share/Robust/"
+        self.data_dir = os.environ.get("HOME") + "/.local/share/Hook/"
         self.data_file_name = "tree.P"  
         self.data_path = self.data_dir + self.data_file_name
         if not os.path.exists(os.path.dirname(self.data_dir)):
