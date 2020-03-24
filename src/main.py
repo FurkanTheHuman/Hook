@@ -149,6 +149,9 @@ class TerminalUI:
     def open_editor(self):
         EDITOR = os.environ.get('EDITOR','vim') #that easy!
         initial_message = self.current_node.content # if you want to set up the file somehow
+        if type(initial_message) == str:
+            print(type(initial_message))
+            initial_message = initial_message.encode("utf-8")
 
         with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:
             tf.write(initial_message)
