@@ -4,6 +4,8 @@ from colorama import Fore, Style
 import sys 
 from nodes import TreeEditor , Node
 import os
+import tempfile
+from subprocess import call
 
 """
 We have a model that works for now. 
@@ -137,6 +139,7 @@ class TerminalUI:
             print("current node: ", ls.name)
             choice = input("CHOSE ONE OR PRESS ENTER FOR THIS NOTE: ")
         if data[int(choice)-1][1].sub_nodes == []:
+            self.current_node = data[int(choice)-1][1]
             self.open_editor()
 
         else:
@@ -144,8 +147,19 @@ class TerminalUI:
 
             
     def open_editor(self):
-        print("editor ONLINE")
+        EDITOR = os.environ.get('EDITOR','vim') #that easy!
+        initial_message = self.current_node.content # if you want to set up the file somehow
 
+        with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:
+            tf.write(initial_message)
+            tf.flush()
+            call([EDITOR, tf.name])
+
+            # do the parsing with `tf` using regular File operations.
+            # for instance:
+            tf.seek(0)
+            edited_message = tf.read()
+            self.editor.edit_node(self.current_node.ID, self.current_node.name, edited_message)
     def new_note(self, name):
         self.current_node = self.editor.create_node(name, self.current_node)
         self.open_editor()
@@ -154,7 +168,6 @@ class TerminalUI:
     def save(self):
         self.storage.tree =self.editor.root_node 
         self.storage.save()
-
 
 
 # Example UI
