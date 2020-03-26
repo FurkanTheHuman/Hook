@@ -70,13 +70,9 @@ class TerminalUI:
             self.list_view()
             print("WARNING You are deleting a note!")
             note = self.note_pick(self.current_node)
-            print("----")
-            print(note.ID)
-            print(note.name)
-            print("----")
             self.editor.delete_node(note.ID)
-            self.list_view()
             print("NOTE HAS BEEN DELETED!")
+            self.list_view()
         if self.args.command == "list":
             self.list_view()
         if self.args.command == "chose":
