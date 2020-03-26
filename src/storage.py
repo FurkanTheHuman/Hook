@@ -1,5 +1,7 @@
 import os
 import pickle
+from nodes import *
+
 
 """
 We have a model that works for now. 
@@ -23,6 +25,9 @@ Storage works three times
 * when program starts
 * when program stops 
 * when requested
+
+any time there is a change in a node
+tree should be updated imidiately
 
 """
     
@@ -49,12 +54,10 @@ class Storage:
                 if exc.errno != errno.EEXIST:
                     raise
 
-    def save(self):
-        def serialize(tree, handle):
-            return pickle.dump(tree, handle)
+    def save(self,tree):
         with open(self.data_path, "wb") as f:
             try:
-                serialize(self.tree, f)
+                pickle.dump(tree, f)
                 return True
             except Exception as e:
                 print("Cannot write!!!")
@@ -66,7 +69,9 @@ class Storage:
         try:
             with open(self.data_path, "rb") as f:
                 self.tree = pickle.load(f)
-        except FileNotFoundError:
+        except EOFError:
+            self.tree = Node(name="genesis")
+        except FileNotFoundError or EOFError:
             self.tree = Node(name="genesis")
         return self.tree
 
