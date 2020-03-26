@@ -109,20 +109,25 @@ class TerminalUI:
         for i in ls:
             one.append(i)
         return one
-
+    # Maybe there should be a strong check for genesis node
     def note_pick(self, ls):
         print("note_pick")
         data = self.return_depth_1(ls.sub_nodes)
         self.list_depth_1(ls.sub_nodes)
         self.current_node = ls
-        if ls.sub_nodes == []:
-            return self.current_node
-        print("current node: ", ls.name)
-        choice = input("CHOSE ONE OR PRESS ENTER FOR THIS NOTE: ")
-        if choice == "":
-            return self.current_node
-        else:
+        if ls.name == "genesis": # ???
+            # What happens when there is no node and someone "edit"s??
+            choice = input("CHOSE ONE: ")
             return self.note_pick(data[int(choice)-1]) 
+        else:
+            if ls.sub_nodes == []:
+                return self.current_node
+            print("current node: ", ls.name)
+            choice = input("CHOSE ONE OR PRESS ENTER FOR THIS NOTE: ")
+            if choice == "":
+                return self.current_node
+            else:
+                return self.note_pick(data[int(choice)-1]) 
     def edit_note(self, data):
         self.current_node = data
         self.open_editor()
