@@ -58,8 +58,8 @@ class TerminalUI:
         if self.args.command == "new_sub":
             if self.args.value != None:
                 note = self.note_pick(self.current_node)
-                self.edit_note(note)
                 self.current_node.sub_nodes.append(self.editor.new_note(self.args.value))
+                self.edit_note(self.current_node.sub_nodes[-1])
             else: 
                 self.parser.error("new_sub command reqires name for the note")
 
