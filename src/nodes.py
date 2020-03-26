@@ -16,6 +16,7 @@ class Node:
 
 
 # NOTE: This might get deleted 
+"""
 class NodeTree:
     def __init__(self, root_node):
         self.root_node = root_node
@@ -54,15 +55,16 @@ class NodeTree:
     def list_all(self,node_ls):
         resp = []
         for i in node_ls:
+            print(i)
             if i.sub_nodes == []:
-                resp.append((i.name,None))
+                resp.append((i,[]))
             else:
-                resp.append((i.name, self.list_all(i.sub_nodes)))
+                resp.append((i, self.list_all(i.sub_nodes)))
         return resp
 
     def __str__(self):
         return str(self.list_all(self.root_node_list))
-
+"""
 class TreeEditor:
     def __init__(self, root_node):
         self.root_node = root_node
@@ -78,6 +80,7 @@ class TreeEditor:
         node = self.get_node_by_id(ID, self.root_node)
         node.content = content
         node.name = name
+        node.update_time=datetime.datetime.now() 
         print(id(node))
         print("id(node)")
 
@@ -111,17 +114,19 @@ class TreeEditor:
         resp = []
         for i in node_ls.sub_nodes:
             if i.sub_nodes == []:
-                resp.append((i.content, i.name,[]))
+                resp.append((i,[]))
             else:
-                resp.append((i.content,i.name, self.list_all(i)))
+                resp.append((i, self.list_all(i)))
         return resp
 
     def search_node(self,name):
         pass 
-
+    def new_note(self, name):
+        return Node(name=name)
 
 
 if __name__ == "__main__":
+    # FOR TEST REASONS
     n = TreeEditor(Node(name="genesis"))
     n.create_node("test", n.root_node)
     n.create_node("tet", n.root_node)
