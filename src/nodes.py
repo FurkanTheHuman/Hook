@@ -81,14 +81,13 @@ class TreeEditor:
         node.content = content
         node.name = name
         node.update_time=datetime.datetime.now() 
-        print(id(node))
-        print("id(node)")
 
         return node
 
     def delete_node(self, ID):
         node = self.get_node_by_idx(ID, self.root_node)
-        node.sub_nodes = filter(lambda x : x.ID !=ID, node.sub_nodes)
+        node2 = self.get_node_by_id(ID, self.root_node)
+        node.sub_nodes = [ i  for i in node.sub_nodes if i.ID != ID ]
         return node
     def get_node_by_id(self,ID, root_node):
         for i in root_node.sub_nodes:
@@ -103,9 +102,9 @@ class TreeEditor:
     def get_node_by_idx(self,ID, root_node):
         for i in root_node.sub_nodes:
             if i.ID == ID:
-                return i
+                return root_node
             if i.sub_nodes != None:
-                x = self.get_node_by_id(ID, i)
+                x = self.get_node_by_idx(ID, i)
                 if x != None:
                     return i
         return None       

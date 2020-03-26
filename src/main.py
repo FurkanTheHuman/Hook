@@ -67,7 +67,16 @@ class TerminalUI:
             note = self.note_pick(self.current_node)
             self.edit_note(note)
         if self.args.command == "delete":
-            pass
+            self.list_view()
+            print("WARNING You are deleting a note!")
+            note = self.note_pick(self.current_node)
+            print("----")
+            print(note.ID)
+            print(note.name)
+            print("----")
+            self.editor.delete_node(note.ID)
+            self.list_view()
+            print("NOTE HAS BEEN DELETED!")
         if self.args.command == "list":
             self.list_view()
         if self.args.command == "chose":
@@ -111,21 +120,18 @@ class TerminalUI:
         print("current node: ", ls.name)
         choice = input("CHOSE ONE OR PRESS ENTER FOR THIS NOTE: ")
         if choice == "":
-            print("t: ",self.current_node.name)
             return self.current_node
         else:
             return self.note_pick(data[int(choice)-1]) 
     def edit_note(self, data):
-        print("edit_note")
         self.current_node = data
         self.open_editor()
 
         return data            
     def open_editor(self):
         EDITOR = os.environ.get('EDITOR','vim') #that easy!
-        initial_message = self.current_node.content # if you want to set up the file somehow
+        initial_message = self.current_node.content 
         if type(initial_message) == str:
-            print(type(initial_message))
             initial_message = initial_message.encode("utf-8")
 
         with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:

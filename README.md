@@ -27,6 +27,8 @@ hook delete ideas
 	deletes from data file but creates a recovery file 
 	and at some point deletes that too
 
+
+
 at some point I want to show everything at the browser
 but for now not necessary
 hook server 
