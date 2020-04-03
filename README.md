@@ -5,7 +5,6 @@ I wanted to write a program that "just works!(tm)".
 
 Mandatory xkcd: xkcd.com/927/
 
----
 
 # Notes to my self
 ### how ironic

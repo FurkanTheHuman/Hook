@@ -1,7 +1,10 @@
 import os
 import pickle
 from nodes import *
-
+from abc import ABC, abstractmethod
+import errno
+from pathlib import Path
+from functools import wraps
 
 """
 We have a model that works for now. 
@@ -30,19 +33,57 @@ any time there is a change in a node
 tree should be updated imidiately
 
 """
+
+
+
+class BaseStorage(ABC):
+    def save(self, tree):
+        raise NotImplementedError("You should implement save method for this class")
+    def load(self):
+        raise NotImplementedError("You should implement load method for this class")
+
+def test(f):
+    def loop(self, tree, path=""):
+        f(self, tree, path="")
+        self.get_diff()
+    return loop
     
-# Stroage unit 
-# Might get an interface for other types of storages
-class Storage:
-    """
-    user data is stored at $HOME/.local/share/Hook/tree.P
-        
-    three types of storage
-        * local file
-        * github
-        * server
-    saves files and loads files basically
-    """
+
+    
+#PROBLEM: This thing is broken
+# fix
+class OpenFileStorage(BaseStorage):
+    def __init__(self):
+        self.node_names = [] 
+        self.data_dir = os.environ.get("HOME") + "/.local/share/Hook/file_storage/"
+        if not os.path.exists(os.path.dirname(self.data_dir)):
+            try:
+                os.makedirs(os.path.dirname(self.data_dir))
+            except OSError as exc: # Guard against race condition
+                if exc.errno != errno.EEXIST:
+                    raise
+
+    def create_dir(self, path, node):
+        Path(self.data_dir+path).mkdir(parents=True, exist_ok=True)
+        with open(self.data_dir+path+node.name, "w") as f:
+            if node.content == "":
+                f.write("+")                
+            else:
+                f.write(str(node.content, "utf-8"))
+
+    def save(self, tree, path=''):
+        self.create_dir(path, tree)
+        if tree.sub_nodes != []:
+            for i in tree.sub_nodes:
+                self.save(i, path+ i.name+"/")
+
+
+    # implement
+    def load(self):
+        pass
+
+
+class PickleStorage(BaseStorage):
     def __init__(self):
         self.data_dir = os.environ.get("HOME") + "/.local/share/Hook/"
         self.data_file_name = "tree.P"  
@@ -53,8 +94,7 @@ class Storage:
             except OSError as exc: # Guard against race condition
                 if exc.errno != errno.EEXIST:
                     raise
-
-    def save(self,tree):
+    def save(self, tree):
         with open(self.data_path, "wb") as f:
             try:
                 pickle.dump(tree, f)
@@ -63,7 +103,6 @@ class Storage:
                 print("Cannot write!!!")
                 print(e)
                 return False
-        
         
     def load(self):
         try:
@@ -75,3 +114,29 @@ class Storage:
             self.tree = Node(name="genesis")
         return self.tree
 
+
+# Stroage unit 
+
+class Storage:
+    """
+    user data is stored at $HOME/.local/share/Hook/tree.P
+        
+    three types of storage
+        * local file
+        * github
+        * server
+    saves files and loads files basically
+    """
+    def __init__(self, *args):
+        self.storage_methods = [i() for i in args]
+
+    def save(self,tree):
+        for i in self.storage_methods:
+            i.save(tree)
+        
+    def load(self, from_where=None):
+        if from_where == None:
+            return self.storage_methods[0].load()
+
+        else:
+            return from_where.load()

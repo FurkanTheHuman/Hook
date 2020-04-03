@@ -7,8 +7,8 @@ import os
 from subprocess import call
 
 
-from nodes import TreeEditor , Node
-from storage import Storage
+from nodes import TreeEditor 
+from storage import Storage, PickleStorage, OpenFileStorage
 
 
 # Highly toxic interface
@@ -18,8 +18,7 @@ Design notes:
     A UI is a connector between Storage and and TreeEditor
 
 NOTE: Write the details of storage and tree interface for UI
-by ınterface I mean which actions should be 
-implemented and how
+by interface I mean which actions should be 
 
 ----
 there should be a way to pick nodes
@@ -40,7 +39,7 @@ TODO: remove every relation with Node class
 class TerminalUI:
     def __init__(self):
         self.args = sys.argv
-        self.storage = Storage()
+        self.storage = Storage(PickleStorage, OpenFileStorage)
         self.editor = TreeEditor(self.storage.load())
         self.current_node = self.editor.root_node
         self.args = self.set_up_args()
@@ -77,8 +76,23 @@ class TerminalUI:
             self.list_view()
         if self.args.command == "chose":
             pass
-        if self.args.command == "jump":
-            pass
+        if self.args.command == "jump":# problem: a file name can't contain ";" 
+            def search(tree_list, node_name):
+                for i in tree_list:
+                    if i.name ==node_name:
+                        return i
+                raise NameError("ERR: "+ i + " not found in " + position_on_tree.name)
+
+            addr = self.args.value.split(",")
+            position_on_tree= self.current_node
+            for i in addr:
+                if i not in [node.name for node in self.return_depth_1(position_on_tree.sub_nodes)]:
+                    raise NameError("ERR: "+ i + " not found in " + position_on_tree.name)
+                else:
+                    tmp_node_list = self.return_depth_1(position_on_tree.sub_nodes)
+                    position_on_tree = search(position_on_tree.sub_nodes, i)
+            self.current_node = position_on_tree
+            self.open_editor()
 
     def list_view(self):
         # Change this.
@@ -166,8 +180,8 @@ class TerminalUI:
 
 
 
-# Example UI
-
+# for an interface like browser this code should be a loop.
+# after any change evaluate commands and  
 if __name__ == '__main__':
     term = TerminalUI()
     term.evalaluate_args()
