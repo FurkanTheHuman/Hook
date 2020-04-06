@@ -63,14 +63,30 @@ class OpenFileStorage(BaseStorage):
                 if exc.errno != errno.EEXIST:
                     raise
 
-    def create_dir(self, path, node):
-        Path(self.data_dir+path).mkdir(parents=True, exist_ok=True)
-        with open(self.data_dir+path+node.name, "w") as f:
-            if node.content == "":
-                f.write("+")                
-            else:
-                f.write(str(node.content, "utf-8"))
+    def check_change(self, file, current_contents):
+        contents = file.read()
+        print(current_contents)
+        if current_contents == "":
+            return contents == current_contents
+        if current_contents.decode() == contents:
+            return False
+        return True
 
+    def create_dir(self, path, node):
+        print(path, "\n::"+ node.name)
+        Path(self.data_dir+path).mkdir(parents=True, exist_ok=True)
+        change_state = False
+        with open(self.data_dir+path+node.name, "r") as f:
+            change_state = self.check_change(f, node.content)
+                
+        with open(self.data_dir+path+node.name, "w") as f:
+            if change_state:
+                if node.content == "":
+                    f.write("+")                
+                else:
+                    f.write(str(node.content, "utf-8"))
+
+    # There is a problem with delete operation
     def save(self, tree, path=''):
         self.create_dir(path, tree)
         if tree.sub_nodes != []:
@@ -78,7 +94,7 @@ class OpenFileStorage(BaseStorage):
                 self.save(i, path+ i.name+"/")
 
 
-    # implement
+    # implementl
     def load(self):
         pass
 
