@@ -1,5 +1,7 @@
 import os
 import pickle
+from datetime import datetime
+
 from nodes import *
 from abc import ABC, abstractmethod
 import errno
@@ -41,13 +43,9 @@ class BaseStorage(ABC):
         raise NotImplementedError("You should implement save method for this class")
     def load(self):
         raise NotImplementedError("You should implement load method for this class")
+    def get_name(self):
+        raise NotImplementedError("You should implement load method for this class")
 
-def test(f):
-    def loop(self, tree, path=""):
-        f(self, tree, path="")
-        self.get_diff()
-    return loop
-    
 
     
 #PROBLEM: This thing is broken
@@ -55,7 +53,8 @@ def test(f):
 class OpenFileStorage(BaseStorage):
     def __init__(self):
         self.node_names = [] 
-        self.data_dir = os.environ.get("HOME") + "/.local/share/Hook/file_storage/"
+        self.tree = None
+        self.data_dir = os.environ.get("HOME") + "/Desktop/btodo/src"
         if not os.path.exists(os.path.dirname(self.data_dir)):
             try:
                 os.makedirs(os.path.dirname(self.data_dir))
@@ -94,14 +93,21 @@ class OpenFileStorage(BaseStorage):
                 self.save(i, path+ i.name+"/")
 
 
-    # implementl
-    def load(self):
-        pass
+    # implement
+    # NOTE: when one of the Storage managers loads the file 
+    # they should share it
+    # and when I use one file manager and after activate
+    # another one they should syncronize 
+    # TODO: when writing file I don't save all info on Node()
+    def load(self, path="/"):
+        this_node = self.load_this_node(path)
+
 
 
 class PickleStorage(BaseStorage):
     def __init__(self):
-        self.data_dir = os.environ.get("HOME") + "/.local/share/Hook/"
+        self._stroage_type = "pickle"
+        self.data_dir = os.environ.get("HOME") + "/Desktop/btodo/src"
         self.data_file_name = "tree.P"  
         self.data_path = self.data_dir + self.data_file_name
         if not os.path.exists(os.path.dirname(self.data_dir)):
@@ -110,6 +116,9 @@ class PickleStorage(BaseStorage):
             except OSError as exc: # Guard against race condition
                 if exc.errno != errno.EEXIST:
                     raise
+    def get_name(self):
+        return self._stroage_type
+
     def save(self, tree):
         with open(self.data_path, "wb") as f:
             try:
@@ -130,6 +139,57 @@ class PickleStorage(BaseStorage):
             self.tree = Node(name="genesis")
         return self.tree
 
+    def _is_name_used(self, name, parent_node):
+        if parent_node:
+            return name in [node.name for node in parent_node.sub_nodes]
+        return None
+
+    def create(self, parent, name):
+        if not self._is_name_used(name, parent):
+            node = Node(name=name)
+            parent.sub_nodes.append(node)
+            return node
+        raise NameError("This name is already in use")
+
+    def _find_parent(self, child):
+        visited = set()
+        def depth_first_search(visited, root, child):
+            parent = None
+            if root not in visited:
+                if child in root.sub_nodes:
+                    return root
+                visited.add(root)
+                for sub in root.sub_nodes:
+                    depth_first_search(visited, sub, child)
+            return None
+        return depth_first_search(visited, self.tree, child)
+
+
+    def edit_node(self, node, name, content):
+        if node.name == name or not self._is_name_used(name, self._find_parent(node)):
+            node.content = content
+            node.name = name
+            node.update_time = datetime.datetime.now()
+        return node
+
+    def delete_node(self, node):
+        parent = self._find_parent(node)
+        parent.sub_nodes = [ i  for i in parent.sub_nodes if i != node ]
+        return node
+
+    def relation_table(self):
+        visited = set()
+        data = []
+        def depth_first_search(visited, root):
+            parent = None
+            if root not in visited:
+                visited.add(root)
+                data.append({"node": root , "sub_nodes": [i for i in root.sub_nodes]})
+                for sub in root.sub_nodes:
+                    depth_first_search(visited, sub)
+            return None
+        depth_first_search(visited, self.tree)
+        return data
 
 # Stroage unit 
 
@@ -143,16 +203,46 @@ class Storage:
         * server
     saves files and loads files basically
     """
-    def __init__(self, *args):
+    def __init__(self, *args, default="pickle"):
         self.storage_methods = [i() for i in args]
+        self.default_storage_access = default
+        print(self.storage_methods)
+    def get_storage_by_name(self, name):
+        for storage in self.storage_methods:
+            if storage.get_name() == name:
+                return storage
+        return None
 
-    def save(self,tree):
-        for i in self.storage_methods:
-            i.save(tree)
+    def get_default_storage(self):
+        return self.get_storage_by_name(self.default_storage_access)
+
+    def set_storage(self, name):
+        for storage in self.storage_methods:
+            if storage.get_name() == name:
+                self.default_storage_access = storage
+                return storage
+
+    def create(self, parent, name):
+        return self.get_default_storage().create(parent, name)
+
+    def edit(self, node, name, content):
+        return self.get_default_storage().edit_node(node, name, content)
+
+    def delete(self, node):
+        return self.get_default_storage().delete_node(node)
+
+    def read(self, node):
+        return node.contents
+
+    def get_root(self):
+        return self.get_default_storage().tree
+    def save(self):
+        self.get_storage_by_name(self.default_storage_access)\
+            .save(self.get_storage_by_name(self.default_storage_access).tree)
         
-    def load(self, from_where=None):
-        if from_where == None:
-            return self.storage_methods[0].load()
+    def load(self):
+        self.get_storage_by_name(self.default_storage_access).load()
 
-        else:
-            return from_where.load()
+    def relation_table(self):
+        return self.get_storage_by_name(self.default_storage_access).relation.table()
+

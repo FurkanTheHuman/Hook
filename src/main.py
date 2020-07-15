@@ -1,5 +1,4 @@
-#!/usr/bin/env python 
-from colorama import Fore, Style
+#!/usr/bin/env python3
 import argparse
 import sys 
 import tempfile
@@ -39,7 +38,7 @@ TODO: remove every relation with Node class
 class TerminalUI:
     def __init__(self):
         self.args = sys.argv
-        self.storage = Storage(PickleStorage, OpenFileStorage)
+        self.storage = Storage(PickleStorage)
         self.editor = TreeEditor(self.storage.load())
         self.current_node = self.editor.root_node
         self.args = self.set_up_args()
@@ -100,8 +99,7 @@ class TerminalUI:
         def disp(p, depth=0):
             for i in p:
                 node, sub_nodes = i 
-                print(Fore.GREEN + str(" "*depth+ "-")+" ",end="")
-                print(Style.RESET_ALL, end="")
+                print(str(" "*depth+ "-")+" " , end="")
                 print( node.name , "last edited: [", node.update_time,"]")
                 if sub_nodes != []:
                     disp(sub_nodes, depth=depth+len(node.name)+2)
@@ -110,9 +108,9 @@ class TerminalUI:
     def list_depth_1(self, ls):
         counter = 1
         for i in ls:
-            print(Fore.GREEN + str(counter)+": "+ i.name)
+            print(str(counter)+": "+ i.name)
             counter +=1 
-        print(Style.RESET_ALL)
+        print()
     
     def return_depth_1(self,ls):
         one = []
@@ -149,7 +147,7 @@ class TerminalUI:
         if type(initial_message) == str:
             initial_message = initial_message.encode("utf-8")
 
-        with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:
+        with tempfile.NamedTemporaryFile(suffix=".md") as tf:
             tf.write(initial_message)
             tf.flush()
             call([EDITOR, tf.name])
