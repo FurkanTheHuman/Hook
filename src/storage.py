@@ -148,32 +148,35 @@ class PickleStorage(BaseStorage):
         if not self._is_name_used(name, parent):
             node = Node(name=name)
             parent.sub_nodes.append(node)
+            node.sub_nodes = []
             return node
-        raise NameError("This name is already in use")
+        raise NameError("This name is already in use "+ name)
 
-    def _find_parent(self, child):
+    def find_parent(self, child):
         visited = set()
         def depth_first_search(visited, root, child):
             parent = None
             if root not in visited:
-                if child in root.sub_nodes:
+                if child.ID in [i.ID for i in root.sub_nodes]:
                     return root
                 visited.add(root)
                 for sub in root.sub_nodes:
-                    depth_first_search(visited, sub, child)
+                    test =  depth_first_search(visited, sub, child)
+                    if test is not None:
+                        return test
             return None
         return depth_first_search(visited, self.tree, child)
 
 
     def edit_node(self, node, name, content):
-        if node.name == name or not self._is_name_used(name, self._find_parent(node)):
+        if node.name == name or not self._is_name_used(name, self.find_parent(node)):
             node.content = content
             node.name = name
             node.update_time = datetime.datetime.now()
         return node
 
     def delete_node(self, node):
-        parent = self._find_parent(node)
+        parent = self.find_parent(node)
         parent.sub_nodes = [ i  for i in parent.sub_nodes if i != node ]
         return node
 
@@ -206,13 +209,14 @@ class Storage:
     def __init__(self, *args, default="pickle"):
         self.storage_methods = [i() for i in args]
         self.default_storage_access = default
-        print(self.storage_methods)
     def get_storage_by_name(self, name):
         for storage in self.storage_methods:
             if storage.get_name() == name:
                 return storage
         return None
 
+    def get_full_object(self):
+        return self.get_default_storage().tree
     def get_default_storage(self):
         return self.get_storage_by_name(self.default_storage_access)
 
@@ -230,19 +234,36 @@ class Storage:
 
     def delete(self, node):
         return self.get_default_storage().delete_node(node)
-
+    def find_parent(self, child):
+        return self.get_default_storage().find_parent(child)
     def read(self, node):
         return node.contents
 
     def get_root(self):
         return self.get_default_storage().tree
+
     def save(self):
-        self.get_storage_by_name(self.default_storage_access)\
+        self.get_default_storage()\
             .save(self.get_storage_by_name(self.default_storage_access).tree)
-        
+        print("saved!!!!")
     def load(self):
         self.get_storage_by_name(self.default_storage_access).load()
 
     def relation_table(self):
-        return self.get_storage_by_name(self.default_storage_access).relation.table()
+        return self.get_storage_by_name(self.default_storage_access).relation_table()
 
+if __name__ == "__main__":
+    test = PickleStorage()
+    test.load()
+    for i in test.relation_table():
+        print(">>>", i)
+    test.create(test.relation_table()[0].get("node"), "furkan")
+    p = test.create(test.relation_table()[0].get("node"), "dogu")
+    c = test.create(p, "furkan")
+    print("AFTER")
+    print("AFTER")
+    print("AFTER")
+    for i in test.relation_table():
+        print(">>>", i)
+
+    print(test.find_parent(c))

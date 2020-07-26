@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+
 import argparse
 import sys 
 import tempfile
@@ -75,7 +76,7 @@ class TerminalUI:
             self.list_view()
         if self.args.command == "chose":
             pass
-        if self.args.command == "jump":# problem: a file name can't contain ";" 
+        if self.args.command == "jump":# problem: a file name can't contain ";"
             def search(tree_list, node_name):
                 for i in tree_list:
                     if i.name ==node_name:
@@ -99,7 +100,7 @@ class TerminalUI:
         def disp(p, depth=0):
             for i in p:
                 node, sub_nodes = i 
-                print(str(" "*depth+ "-")+" " , end="")
+                print(str(" "*depth+ "-")+" ")
                 print( node.name , "last edited: [", node.update_time,"]")
                 if sub_nodes != []:
                     disp(sub_nodes, depth=depth+len(node.name)+2)

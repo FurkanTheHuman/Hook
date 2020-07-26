@@ -7,8 +7,11 @@ class TreeEditor:
     def _is_name_collides(self, name, parent_node):
         return name not in [node.name for node in parent_node.sub_nodes]
 
+    def test(self):
+        return self.storage.tree.sub_nodes[3]
     def create_node(self, name, parent_node=None):
         if parent_node is None:
+            print(self.storage.get_root())
             return self.storage.create(self.storage.get_root(), name)
         return self.storage.create(parent_node, name)
 
@@ -20,36 +23,24 @@ class TreeEditor:
 
     def save(self):
         self.storage.save()
+        self.storage.load() 
+    def find_parent(self, child):
+        return self.storage.find_parent(child)
+    def get_full_object(self):
+        return self.storage.get_full_object()
 
     def relation_table(self):
-        return self.storage.relation_table()
-
-    def get_node_by_id(self, ID, root_node):
-        for i in root_node.sub_nodes:
-            if i.ID == ID:
-                return i
-            if i.sub_nodes is not None:
-                x = self.get_node_by_id(ID, i)
-                if x is not None:
-                    return x
-        return None
-
-    def get_node_by_idx(self, ID, root_node):
-        for i in root_node.sub_nodes:
-            if i.ID == ID:
-                return root_node
-            if i.sub_nodes is not None:
-                x = self.get_node_by_idx(ID, i)
-                if x is not None:
-                    return i
-        return None
-
-    def list_all(self):
         return self.storage.relation_table()
 
 
 if __name__ == "__main__":
     ed = TreeEditor()
-    tt = ed.create_node("Test")
-    ed.edit_node(tt, tt.name, "anan team")
+    for i in ed.relation_table():
+        print(i.get("node").update_time)
+        print(" "*5,str([node.name for node in  i.get("sub_nodes")]).replace(",","\n"+" "*5))
+        if i.get("node").name == "yeni":
+            ed.edit_node(i.get("node"),i.get("node").name,"HELLO world ![asddsa](https://picsum.photos/200/300/)")
+    for i in ed.relation_table():
+        print(">>>", i)
+    
     ed.save()

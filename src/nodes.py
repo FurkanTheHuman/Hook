@@ -13,5 +13,5 @@ class Node:
         self.content = content
         self.creation_date = creation_date
         self.update_time = update_time
-        self.sub_nodes = sub_nodes
+        self.sub_nodes = []
 
