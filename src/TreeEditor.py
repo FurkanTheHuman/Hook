@@ -36,7 +36,7 @@ class TreeEditor:
 if __name__ == "__main__":
     ed = TreeEditor()
     for i in ed.relation_table():
-        print(i.get("node").update_time)
+        print(i.get("node").name)
         print(" "*5,str([node.name for node in  i.get("sub_nodes")]).replace(",","\n"+" "*5))
         if i.get("node").name == "yeni":
             ed.edit_node(i.get("node"),i.get("node").name,"HELLO world ![asddsa](https://picsum.photos/200/300/)")

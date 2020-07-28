@@ -1,5 +1,6 @@
 import flask
 from flask import request, jsonify
+from flask import render_template
 
 
 import json 
@@ -137,7 +138,7 @@ def find_nd(ID):
     return False
 
 @app.route('/update/', methods=['POST'])
-def add():
+def update():
     global ls
     print(request.get_json(force=True))
     print(request)
@@ -146,10 +147,59 @@ def add():
     content = req["content"]
 
     ID = req["ID"]
+    print("ID")
+    print(ID)
     node = find_nd(ID)
-    test.edit_node(node, node.name, content)
+    
+    if node:
+        print(node.ID)
+        test.edit_node(node, node.name, content)
+        test.save()
+        ls = generate_table()
+    return jsonify({"content": content, "state": True if node else False})
+
+
+@app.route('/create/<path:ID>', methods=['GET', 'POST'])
+def create(ID):
+    global ls
+    req = request.get_json(force=True)
+    
+    name = req["name"]
+    parent_node = test.find_parent(find_nd(ID))
+
+    new_node = test.create_node(name, parent_node)
+    test.save()
+    print("new_node.ID")
+    print(new_node.ID)
+    ls = generate_table()
+    return jsonify({"state": "OK", "new_id": str(new_node.ID)})
+
+
+@app.route('/create_sub/<path:ID>', methods=['GET', 'POST'])
+def create_sub(ID):
+    global ls
+    req = request.get_json(force=True)
+
+    name = req["name"]
+    parent_node = find_nd(ID)
+    new_node = test.create_node(name, parent_node)
     test.save()
     ls = generate_table()
-    return jsonify({"content": content})
+    return jsonify({"state": "OK", "new_id": str(new_node.ID)})
 
-app.run()
+
+@app.route('/delete/<path:ID>', methods=['GET'])
+def delete(ID):
+    global ls
+    parent_node = find_nd(ID)
+    new_node = test.delete_node(parent_node)
+    test.save()
+    ls = generate_table()
+    return jsonify({"state": "OK" })
+
+@app.route('/index')
+def index():
+    user = {'username': 'Miguel'}
+    return render_template('code.html', title='Home', user=user)
+
+app.run(host= '0.0.0.0')
