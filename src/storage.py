@@ -107,9 +107,10 @@ class OpenFileStorage(BaseStorage):
 class PickleStorage(BaseStorage):
     def __init__(self):
         self._stroage_type = "pickle"
+        self.dir_path = os.path.dirname(os.path.realpath(__file__))
         self.data_dir = "./test"
         self.data_file_name = "tree.P"  
-        self.data_path = self.data_dir + self.data_file_name
+        self.data_path = os.path.join(self.dir_path,self.data_dir + self.data_file_name)
         if not os.path.exists(os.path.dirname(self.data_dir)):
             try:
                 os.makedirs(os.path.dirname(self.data_dir))
