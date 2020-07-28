@@ -107,7 +107,7 @@ class OpenFileStorage(BaseStorage):
 class PickleStorage(BaseStorage):
     def __init__(self):
         self._stroage_type = "pickle"
-        self.data_dir = os.environ.get("HOME") + "/Desktop/btodo/src"
+        self.data_dir = "./test"
         self.data_file_name = "tree.P"  
         self.data_path = self.data_dir + self.data_file_name
         if not os.path.exists(os.path.dirname(self.data_dir)):

@@ -1,39 +1,28 @@
-# Hook Note Taking App
+<img src="https://image.flaticon.com/icons/svg/2421/2421033.svg" alt="Kitten"
+	title="A cute kitten" width="150" height="100" style="margin-left: 40%;" />
 
-After some angry days of trying and failing some note taking programs I concluded that note taking is hard.
-I wanted to write a program that "just works!(tm)".
+# Hook Editor
+Hook editor is an editor written in Python, using Flask. This editor desgined like [CherryTree](https://github.com/giuspen/cherrytree). The crucial difference is Hook runs on browser and can be served from a server. Also Hook has a generic storage model. Anything that implements **BaseStorage** can be used as a storage source. 
 
-Mandatory xkcd: xkcd.com/927/
+### Examples: 
+* a relational db
+* a remote server
+* github
+* in memory db
+* ordinary unix file system
+* json file
+* Python pickle file
 
+Because of current state of the project only Pickle storage is implemented. 
 
-# Notes to my self
-### how ironic
-UI is problem. Not like I am going to write some fancy shit
-but the design of interaction some times unclear.
-To understand it:
-- it is git like
-- when I create or edit a node vim opens up
-- this shit can be any other editor that is suitable 
-- other than that it just terminal based.
+`Press the *eye* icon to see the preview.`
 
-### <b>Examples</b>
+# Warning! On Windows there might be file problems.
+# I only tried this in Ubuntu
 
-hook new "my ideas"
--	opens up vim  for "my ideas" at root 
-hook edit ideas
--	opens if no sub node exists else asks interactivly
-hook delete ideas
--	deletes from data file but creates a recovery file 
-	and at some point deletes that too
+## Installing
 
+`python3 -i requirements.txt`
+`python3 src/api.py`
 
-
-at some point I want to show everything at the browser
-but for now not necessary
-hook server 
-also remote stroage can be efective
-
-
-IDEA: like git there is no global stuff 
-but but hear me out you usually don't need more than one source
-so that is easier
+Then go into `http://localhost:5000/index`

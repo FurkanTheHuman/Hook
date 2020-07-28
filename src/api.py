@@ -6,14 +6,10 @@ from flask import render_template
 import json 
 from TreeEditor import TreeEditor
 
-from slugify import slugify  
-
 from datetime import timedelta
 from flask import make_response, request, current_app
 from functools import update_wrapper
 from flask_cors import CORS
-
-
 
 
 def crossdomain(origin=None, methods=None, headers=None, max_age=21600,
@@ -72,12 +68,13 @@ def crossdomain(origin=None, methods=None, headers=None, max_age=21600,
 
 
 app = flask.Flask(__name__)
-app.config["DEBUG"] = True
+app.config["DEBUG"] = True 
 #CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 CORS(app, resources={r"/*": {"origins": "*"}})
 #CORS(app, resources={r"/*": {"origins": "*"}}, send_wildcard=True)
 test = TreeEditor()
+
 
 def find_parent(root, child):
     visited = set()
@@ -114,12 +111,31 @@ def find_node(addr, table):
             node = i.get("node")
             return {"name": node.name , "content": node.content}
 
+header = """
+--   /$$   /$$                     /$$            
+--  | $$  | $$                    | $$            
+--  | $$  | $$  /$$$$$$   /$$$$$$ | $$   /$$      
+--  | $$$$$$$$ /$$__  $$ /$$__  $$| $$  /$$/      
+--  | $$__  $$| $$  \ $$| $$  \ $$| $$$$$$/       
+--  | $$  | $$| $$  | $$| $$  | $$| $$_  $$       
+--  | $$  | $$|  $$$$$$/|  $$$$$$/| $$ \  $$      
+--  |__/  |__/ \______/  \______/ |__/  \__/      
+--                                                
+--                                                
+"""
+print(header)
+print("#"*50+"\n")
+print("For the editor page, see: http://0.0.0.0:5000/index \n")
+print("#"*50)
 
 @app.route('/', methods=['GET'])
 @crossdomain(origin='*')
 def home():
-    if "test" in request.args:
-        print(request.args["test"])
+    global ls
+    if len(ls) == 1:
+        test.create_node("Welcome")
+        test.save()
+        ls = generate_table()
     return jsonify(ls)
 
 
@@ -127,8 +143,6 @@ def home():
 @crossdomain(origin='*')
 def get_entry(addr):
     full_addr =  addr.split("/")
-    print(addr)
-    print(find_node(["genesis"]+full_addr, test.relation_table()))
     return jsonify(find_node(["genesis"]+full_addr, test.relation_table()))
 
 def find_nd(ID):
@@ -140,19 +154,11 @@ def find_nd(ID):
 @app.route('/update/', methods=['POST'])
 def update():
     global ls
-    print(request.get_json(force=True))
-    print(request)
     req = request.get_json(force=True)
-
     content = req["content"]
-
     ID = req["ID"]
-    print("ID")
-    print(ID)
     node = find_nd(ID)
-    
     if node:
-        print(node.ID)
         test.edit_node(node, node.name, content)
         test.save()
         ls = generate_table()
@@ -169,8 +175,6 @@ def create(ID):
 
     new_node = test.create_node(name, parent_node)
     test.save()
-    print("new_node.ID")
-    print(new_node.ID)
     ls = generate_table()
     return jsonify({"state": "OK", "new_id": str(new_node.ID)})
 
@@ -199,7 +203,7 @@ def delete(ID):
 
 @app.route('/index')
 def index():
-    user = {'username': 'Miguel'}
-    return render_template('code.html', title='Home', user=user)
+    info = {'ip': flask.request.remote_addr}
+    return render_template('code.html', title='Home', info=info)
 
 app.run(host= '0.0.0.0')

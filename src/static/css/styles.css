@@ -10,7 +10,9 @@
 /* FLEXBOX-BASED LAYOUT */
 
 /* GRID-BASED LAYOUT */
-
+.CodeMirror cm-s-paper CodeMirror-wrap {
+	height: 1600px;
+}
 *,*:focus,*:hover{
     outline:none;
 }
@@ -92,7 +94,7 @@ header {
   
 #text-editor{
     grid-row: 2 / 6;
-
+    height: 200%;
 }
 
 li{
