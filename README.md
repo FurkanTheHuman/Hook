@@ -15,14 +15,25 @@ Hook editor is an editor written in Python, using Flask. This editor desgined li
 
 Because of current state of the project only Pickle storage is implemented. 
 
+
+
 `Press the *eye* icon to see the preview.`
 
 # Warning! On Windows there might be file problems.
 # I only tried this in Ubuntu
 
+Note: because of a cdn internet connection is required.
+This problem can be solved by installing the package.
+But for now I just use cdn
+
+## Screen Shots 
+![image](shot.png "Title")
+
+
+
 ## Installing
 
-`python3 -i requirements.txt`
+`python3 install -r requirements.txt`
 `python3 src/api.py`
 
 Then go into `http://localhost:5000/index`
